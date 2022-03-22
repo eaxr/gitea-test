@@ -1,0 +1,81 @@
+- name: install postgresql
+  yum:
+    name:
+      - postgresql12-server
+      - postgresql12
+      - python3-psycopg2
+    state: latest
+
+- name: initialize the database
+  command: /usr/pgsql-12/bin/postgresql-12-setup initdb 
+
+- name: firewalld rule
+  firewalld: service="postgresql" zone=public permanent=true state=enabled immediate=yes
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: postgresql-12 service
+  service: name=postgresql-12 state=started enabled=yes
+
+- name: postgresql.conf listen_addresses uncomment
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '#(listen_addresses = *)'
+    line: '\1'
+    backrefs: yes
+
+- name: postgresql.conf listen_addresses list
+  lineinfile:
+    path: /var/lib/pgsql/12/data/postgresql.conf
+    state: present
+    regexp: '^listen_addresses'
+    line: "listen_addresses = '{{listen_addresses | join(', ')}}'"
+
+- name: postgresql.conf password_encryption
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '#password_encryption = md5'
+    line: 'password_encryption = scram-sha-256'
+    backrefs: yes
+
+- name: create gitea user
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: gitea
+    password: "{{ gitea_password }}"
+    role_attr_flags: CREATEDB,NOSUPERUSER
+  environment:
+    PGOPTIONS: "-c password_encryption=scram-sha-256"
+
+- name: create gitea db
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: giteadb
+    owner: gitea
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+
+- name: pg_hba.conf local
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/pg_hba.conf
+    insertafter: '# "local" is for Unix domain socket connections only'
+    line: 'local    giteadb    gitea    scram-sha-256'
+
+- name: pg_hba.conf host
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/pg_hba.conf
+    insertafter: '# IPv4 local connections:'
+    line: 'host    giteadb    gitea    {{ gitea_ip }}/32    scram-sha-256'
+
+- name: pg_configuration
+  include: "{{ pg_configuration }}.yml"
+
+- name: restart service
+  service:  name=postgresql-12 state=restarted

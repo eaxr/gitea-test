@@ -1,0 +1,9 @@
+- name: gitea installation
+  gather_facts: false
+  hosts: gitea
+  become: true
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: galaxy/centos_base
+    - role: galaxy/gitea

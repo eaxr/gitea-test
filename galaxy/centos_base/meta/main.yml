@@ -1,0 +1,11 @@
+galaxy_info:
+  description: centos_base
+  min_ansible_version: 1.2
+  license: private use
+  company: test
+  author: eaxr
+  platforms:
+  - name: CentOS
+    versions:
+    - 8
+  galaxy_tags: []

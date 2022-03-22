@@ -1,0 +1,12 @@
+- name: nginx installation
+  gather_facts: false
+  hosts: nginx
+  become: true
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: galaxy/centos_base
+    - role: galaxy/nginx
+      server_name: nginx
+      proxy_pass: http://gitea:3000
+      proxy_pass_ssh: gitea:22

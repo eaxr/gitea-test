@@ -1,0 +1,90 @@
+- name: install nginx
+  yum:
+    name:
+      - nginx
+      - nginx-mod-stream
+      - policycoreutils-python-utils
+    state: latest
+
+- name: creates /etc/nginx/conf.stream.d
+  file:
+    path: /etc/nginx/conf.stream.d
+    state: directory
+    recurse: yes
+
+- name: template nginx
+  template:
+    src: templates/nginx.conf
+    dest: /etc/nginx/nginx.conf
+
+- name: template ssh
+  template:
+    src: templates/gitea_ssh.conf
+    dest: /etc/nginx/conf.stream.d/gitea_ssh.conf
+
+- name: template http
+  template:
+    src: templates/gitea.conf
+    dest: /etc/nginx/conf.d/gitea.conf
+
+- name: firewalld rule http
+  firewalld: service="http" zone=public permanent=true state=enabled immediate=yes
+
+- name: firewalld rule https
+  firewalld: service="https" zone=public permanent=true state=enabled immediate=yes
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: creates /etc/nginx/ssl
+  file:
+    path: /etc/nginx/ssl
+    mode: 0700
+    state: directory
+    recurse: yes
+
+- name: self-signed certificate
+  command: >
+    openssl req -x509 -nodes -subj '/C=US/CN={{ server_name }}'
+    -days 365 -newkey rsa:2048 
+    -keyout /etc/nginx/ssl/gitea.key
+    -out /etc/nginx/ssl/gitea.crt
+    creates=/etc/nginx/ssl/gitea.crt
+
+- name: self-signed certificate trusted
+  command: >
+    openssl x509
+    -in /etc/nginx/ssl/gitea.crt
+    -out /etc/pki/ca-trust/source/anchors/gitea.pem
+    -outform PEM
+
+- name: update-ca-trust
+  command: update-ca-trust
+
+- name: change gitea.key
+  file:
+    path: /etc/nginx/ssl/gitea.key
+    owner: root
+    group: root
+    mode: '0600'
+
+- name: nginx selinux
+  command:
+    semanage port -a -t http_port_t -p tcp 8822
+
+- name: set httpd_can_network_connect
+  seboolean:
+    name: httpd_can_network_connect
+    state: yes
+    persistent: yes
+
+- name: set httpd_can_network_relay
+  seboolean:
+    name: httpd_can_network_relay
+    state: yes
+    persistent: yes
+
+- name: nginx service
+  service: name=nginx state=started enabled=yes

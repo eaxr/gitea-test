@@ -1,0 +1,27 @@
+- name: postgresql.conf max_worker_processes
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '^#max_worker_processes ='
+    line: 'max_worker_processes = 1'
+    backrefs: yes
+
+- name: postgresql.conf shared_buffers
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '^shared_buffers ='
+    line: 'shared_buffers = 256MB'
+    backrefs: yes
+
+- name: postgresql.conf effective_cache_size
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '^#effective_cache_size ='
+    line: 'effective_cache_size = 512MB'
+    backrefs: yes
+
+- name: postgresql.conf work_mem
+  lineinfile:
+    dest: /var/lib/pgsql/12/data/postgresql.conf
+    regexp: '^#work_mem ='
+    line: 'work_mem = 8MB'
+    backrefs: yes

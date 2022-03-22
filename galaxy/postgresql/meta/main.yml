@@ -1,0 +1,7 @@
+galaxy_info:
+  description: postgresql
+  platforms:
+  - name: CentOS
+    versions:
+    - 8
+  galaxy_tags: []

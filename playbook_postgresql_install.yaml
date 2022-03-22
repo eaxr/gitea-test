@@ -1,0 +1,15 @@
+- name: postgresql installation
+  gather_facts: false
+  hosts: postgresql.gitea-test
+  become: true
+  become_method: sudo
+  become_user: root
+  roles:
+    - role: galaxy/centos_base
+    - role: galaxy/postgresql
+      pg_configuration: pg_1x1 #cpu = 1, memory = 1GB
+      listen_addresses:
+          - 127.0.0.1
+          - 192.168.100.193
+      gitea_ip: 192.168.100.143
+      gitea_password: gitea

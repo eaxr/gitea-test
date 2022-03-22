@@ -1,0 +1,5 @@
+- name: get gitea
+  include: get.yml
+
+- name: installation
+  include: installation.yml

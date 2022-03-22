@@ -1,0 +1,54 @@
+- name: mv gitea bin
+  copy:
+    src: /tmp/gitea
+    dest: /usr/local/bin/gitea
+    owner: root
+    group: root
+    mode: 'a+x'
+    remote_src: yes    
+
+- name: creates directories
+  file:
+    path: "{{ item }}"
+    owner: git
+    group: git
+    mode: 0750
+    state: directory
+    recurse: yes
+  loop:
+    - /var/lib/gitea/custom
+    - /var/lib/gitea/data
+    - /var/lib/gitea/log
+
+- name: creates /etc/gitea
+  file:
+    path: /etc/gitea
+    owner: git
+    group: git
+    mode: 0770
+    state: directory
+    recurse: yes
+
+- name: firewalld rule
+  firewalld: port="3000/tcp" zone=public permanent=true state=enabled immediate=yes
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+
+- name: change /etc/gitea
+  file:
+    path: /etc/gitea
+    owner: git
+    group: git
+    mode: 0750
+    state: directory
+    recurse: yes
+
+- name: service
+  systemd:
+    state: started
+    enabled: yes
+    daemon_reload: yes
+    name: gitea

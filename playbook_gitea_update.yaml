@@ -1,0 +1,235 @@
+---
+  - name: update gitea
+    hosts: gitea
+    gather_facts: false
+
+    vars:
+      api_url: http://fedora-workstation:3000
+      gitea_user: gitea
+      gitea_pass: 123456
+
+    tasks:
+    - name: echo from distant star
+      shell: echo "beep beep beep"
+      register: signal
+    - debug: var=signal.stdout_lines
+
+    - name: create organizations
+      vars:
+        gitea_command: create_organization
+        data:
+        - description: "Cyberdyne Systems is the tech corporation responsible for the development of Skynet."
+          full_name: "Cyberdine Systems"
+          location: "USA, California"
+          repo_admin_change_team_access: True
+          username: Cyberdine-Systems
+          visibility: public
+          website: https://terminator.fandom.com/wiki/Cyberdyne_Systems
+
+        - description: "The Resistance is one of the two primary factions in the Future War; it is a military force that fights against Skynet after Judgment Day"
+          full_name: "Resistance"
+          location: ""
+          repo_admin_change_team_access: True
+          username: Resistance
+          visibility: public
+          website: https://terminator.fandom.com/wiki/Resistance
+
+      block:
+        - name: update organizations
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ data }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"
+
+    - name: create users
+      vars:
+        gitea_command: create_user
+        data:
+        - email: "mbdyson@skynet.gitea-test"
+          full_name: "Miles Bennett Dyson"
+          login_name: "mbdyson"
+          must_change_password: True
+          password: "123456"
+          send_notify: False
+          source_id: 0
+          username: "Miles-Bennett-Dyson"
+          visibility: "public"
+
+        - email: "sconnor@skynet.gitea-test"
+          full_name: "Sarah Connor"
+          login_name: "sconnor"
+          must_change_password: True
+          password: "123456"
+          send_notify: False
+          source_id: 0
+          username: "Sarah-Connor"
+          visibility: "public"
+
+        - email: "jconnor@skynet.gitea-test"
+          full_name: "John Connor"
+          login_name: "jconnor"
+          must_change_password: True
+          password: "123456"
+          send_notify: False
+          source_id: 0
+          username: "John-Connor"
+          visibility: "public"
+
+        - email: "t800@skynet.gitea-test"
+          full_name: "T-800"
+          login_name: "t800"
+          must_change_password: True
+          password: "123456"
+          send_notify: False
+          source_id: 0
+          username: "T-800"
+          visibility: "public"
+
+      block:
+        - name: update users
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ data }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"
+
+    - name: create repo for Cyberdine-Systems
+      vars:
+        gitea_command: add_repo_to_org
+        org_name: "Cyberdine-Systems"
+        data:
+        - auto_init: True
+          default_branch: "master"
+          description: "main repo"
+          gitignores: ""
+          issue_labels: ""
+          license: ""
+          name: Skynet
+          private: True
+          readme: ""
+          template: True
+          trust_model: "default"
+
+      block:
+        - name: update repo
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}" \
+                              "{{ org_name }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ data }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"
+
+    - name: create repo for Resistance
+      vars:
+        gitea_command: add_repo_to_org
+        org_name: "Resistance"
+        data:
+        - auto_init: True
+          default_branch: "master"
+          description: "main repo"
+          gitignores: ""
+          issue_labels: ""
+          license: ""
+          name: hastalavista
+          private: True
+          readme: ""
+          template: True
+          trust_model: "default"
+
+      block:
+        - name: update repo
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}" \
+                              "{{ org_name }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ data }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"
+
+    - name: add users to Cyberdine Systems
+      vars:
+        gitea_command: add_user_to_org
+        org_name: "Cyberdine-Systems"
+        users:
+        - Miles-Bennett-Dyson
+
+      block:
+        - name: update repo
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}" \
+                              "{{ org_name }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ users }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"
+
+    - name: add users to Resistance
+      vars:
+        gitea_command: add_user_to_org
+        org_name: "Resistance"
+        users:
+        - Sarah-Connor
+        - John-Connor
+        - T-800
+
+      block:
+        - name: update repo
+          shell: python3 ./gitea_api.py \
+                              "{{ api_url }}" \
+                              "{{ gitea_user }}" \
+                              "{{ gitea_pass }}" \
+                              "{{ gitea_command }}" \
+                              "{{ item }}" \
+                              "{{ org_name }}"
+          delegate_to: 127.0.0.1
+          register: gitea
+          loop: "{{ users }}"
+
+        - name: result
+          debug: 
+            msg: "{{ item }}"
+          loop: "{{ gitea.results}}"

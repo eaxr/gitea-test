@@ -1,0 +1,5 @@
+- name: add repo
+  include: repo.yml
+
+- name: installation
+  include: installation.yml

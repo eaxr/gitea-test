@@ -1,0 +1,2 @@
+url: https://dl.gitea.io/gitea/1.16.4/gitea-1.16.4-linux-amd64
+unit: https://raw.githubusercontent.com/go-gitea/gitea/main/contrib/systemd/gitea.service

@@ -1,0 +1,3 @@
+server_name: "{{ server_name }}"
+proxy_pass: "{{ proxy_pass }}"
+proxy_pass_ssh: "{{ proxy_pass_ssh }}"

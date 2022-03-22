@@ -1,0 +1,17 @@
+- name: add key
+  rpm_key:
+    state: present
+    key: https://download.postgresql.org/pub/repos/yum/RPM-GPG-KEY-PGDG
+
+- name: add repo file
+  yum:
+    name: "{{ repo }}"
+    state: latest
+
+- name: disable module postgresql
+  command: dnf -qy module disable postgresql
+
+- name: update CentOS
+  yum:
+    name: '*'
+    state: latest

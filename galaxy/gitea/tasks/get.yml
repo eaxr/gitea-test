@@ -1,0 +1,24 @@
+- name: install base packages
+  yum:
+    name:
+      - wget
+      - git
+    state: latest
+
+- name: get file
+  get_url:
+    url: "{{ url }}"
+    dest: /tmp/gitea
+
+- name: get file
+  get_url:
+    url: "{{ unit }}"
+    dest: /etc/systemd/system
+
+- name: add git user
+  user:
+    name: git
+    shell: /bin/bash
+    password_lock: yes
+    home: /home/git
+    append: yes
