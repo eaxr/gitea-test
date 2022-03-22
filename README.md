@@ -1,9 +1,11 @@
 # gitea-test
 gitea, nginx, postgresql
 
+Предполагается, что созданы три виртуальные машины, которые имеют минимальную установку и создан пользователь centos. Добавлены ssh ключ для пользователя и добавлена возможность выполнения "sudo" без пароля. Запущено паралельно три конфигурации: playbook_postgresql_install.yaml, playbook_gitea_install.yaml и playbook_nginx_install.yaml. Конфигурация собирает кластер:
+![alt text](https://github.com/eaxr/gitea-test/blob/main/images/gitea1.gif?raw=true)
 
-![alt text](https://github.com/eaxr/gitea-test/blob/master/images/gitea1.gif?raw=true)
+Автоматическое создание организаций, репозиториев и пользователей в gitea, используя её api. Конфигурация создаёт две организации, со своими репозиториями и добавляет пользователй к организации и репозиториям. Один пользователь для одной организации и три для другой. Сам ansible представляет собой надстройку над python скриптом, который использует "yaml". Поэтому есть возможность создавать организации через массив, т.ё. перечисляя названия организаций и запуская создание несколько раз. Создание выполняется с помощью api gitea и это api имее свои ограничения. Например, организации имеют стандартный объект команды (teams), который называется "Owners" и чтобы добавить пользователя к команде, сначала необходимо найти запросом идентификатор команды "id", а не её название. Вторым действием - добавить к ней нужного пользователя. Поэтому логика обрабатывается через gitea_api.py, где описано подключение к api и есть возможность повторного использования методов, чтобы выполнять запросы к api. После создания, если авторизоваться пользователем "Miles-Bennett-Dyson", он будет прикреплён к организации "Cyberdine-Systems" и исеть доступ к репозиторию "Skynet":
+![alt text](https://github.com/eaxr/gitea-test/blob/main/images/gitea2.gif?raw=true)
 
-![alt text](https://github.com/eaxr/gitea-test/blob/master/images/gitea2.gif?raw=true)
-
-![alt text](https://github.com/eaxr/gitea-test/blob/master/images/gitea.png?raw=true)
+Картинка с перечнем пользователей в другой организации, пользователь "gitea" состоит в них, т.к. от него было выполнено создание:
+![alt text](https://github.com/eaxr/gitea-test/blob/main/images/gitea.png?raw=true)
